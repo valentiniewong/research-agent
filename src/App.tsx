@@ -3,10 +3,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Play } from 'lucide-react';
+import { supabase } from './utils/supabase/client';
+
+interface Todo {
+  id: number;
+  name: string;
+  created_at?: string;
+}
 
 export default function App() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTodos() {
+      try {
+        const { data, error } = await supabase.from('todos').select();
+        if (error) {
+          console.error('Supabase query error:', error);
+        } else if (data) {
+          setTodos(data);
+        }
+      } catch (err) {
+        console.error('Error fetching from Supabase:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTodos();
+  }, []);
+
   return (
     <div className="bg-[#EBEBEB] min-h-screen text-[#1A1A1A] font-sans selection:bg-[#1A1A1A] selection:text-white flex flex-col overflow-x-hidden">
       
@@ -55,14 +83,13 @@ export default function App() {
               Using a generic high-quality running placeholder styled strictly in grayscale to match constraints.
            */}
            <video 
-            className="absolute inset-0 w-full h-full object-cover grayscale brightness-90 animate-pulse pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover grayscale brightness-90 pointer-events-none"
             autoPlay 
             loop 
             muted 
             playsInline
-            poster="https://images.unsplash.com/photo-1553676597-3fc74cefa54a?auto=format&fit=crop&q=80&w=2000"
           >
-            {/* <source src="/your-animated-video.mp4" type="video/mp4" /> */}
+            <source src="/video.mp4" type="video/mp4" />
           </video>
           
           {/* Subtle overlay mockup graphic representing the GD-2026 circle in the reference */}
@@ -95,7 +122,8 @@ export default function App() {
             </span>
             {/* Generic placeholder image stylized to pure grayscale */}
             <img 
-              src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1000&q=80" 
+              src="https://nb.scene7.com/is/image/NB/mfcx3no_nb_02_i?$pdpflexf2$&wid=440&hei=440" 
+              srcSet="https://nb.scene7.com/is/image/NB/mfcx3no_nb_02_i?$pdpflexf2$&wid=363&hei=363 1x, https://nb.scene7.com/is/image/NB/mfcx3no_nb_02_i?$pdpflexf22x$&wid=726&hei=726 2x"
               alt="FuelCell Rebel v5 Grey Days" 
               className="w-full h-full object-contain object-center grayscale mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out p-8"
             />
@@ -217,6 +245,45 @@ export default function App() {
                 <p className="text-[10px] font-bold tracking-widest uppercase">RM 329.00</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Supabase Campaign Checklist Section */}
+      <section className="py-24 px-6 md:px-12 bg-white border-t border-b border-[#EBEBEB]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-neutral-400 mb-4">
+              Real-time Database Integration
+            </p>
+            <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter">
+              Campaign Launch Checklist
+            </h2>
+          </div>
+
+          <div className="border border-[#EBEBEB] bg-[#EBEBEB]/10 p-8 md:p-12">
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A]"></div>
+              </div>
+            ) : todos.length === 0 ? (
+              <p className="text-center text-sm text-neutral-400 uppercase tracking-wider py-8">
+                No items found in the Supabase 'todos' table.
+              </p>
+            ) : (
+              <ul className="divide-y divide-[#EBEBEB]">
+                {todos.map((todo) => (
+                  <li key={todo.id} className="py-5 flex items-center justify-between">
+                    <span className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">
+                      {todo.name}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-widest bg-[#1A1A1A] text-white px-3 py-1 font-bold">
+                      Active
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </section>
