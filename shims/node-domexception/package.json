@@ -1,0 +1,6 @@
+{
+  "name": "node-domexception",
+  "version": "1.0.0",
+  "description": "Local shim for node-domexception using native globalThis.DOMException",
+  "main": "index.js"
+}
