@@ -5,11 +5,24 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUP
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 // Browser client creator for Supabase SSR
-export const createClient = () =>
-  createBrowserClient(
-    supabaseUrl!,
-    supabaseKey!,
+export const createClient = () => {
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase credentials missing in browser. Returning mock client.");
+    return {
+      auth: {
+        getUser: async () => ({ data: { user: null }, error: null }),
+        getSession: async () => ({ data: { session: null }, error: null }),
+      },
+      from: () => ({
+        select: async () => ({ data: [], error: { message: "Supabase credentials missing." } }),
+      }),
+    } as any;
+  }
+  return createBrowserClient(
+    supabaseUrl,
+    supabaseKey,
   );
+};
 
 // Legacy singleton instance for backward compatibility with existing code
 let supabaseInstance: any = null;
