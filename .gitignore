@@ -9,3 +9,5 @@ coverage/
 .agents/
 scratch/
 skills-lock.json
+.next/
+tsconfig.tsbuildinfo
